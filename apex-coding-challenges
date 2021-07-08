@@ -54,4 +54,80 @@ public class Challenges {
         upsert newBobs;
         
     }
+    
+    
+public void Challenge5a(){
+        List<Contact> defaultPhones = new List<Contact>();
+        for(Contact c: [SELECT account.phone FROM Contact WHERE Phone = ''] ){
+            c.Phone = c.account.phone;
+            defaultPhones.add(c);
+        }
+        update defaultPhones;
+    }
+    
+    public void Challenge5b(){
+    	List<Task> defaultEmails = new List<Task>();
+        for(Contact c: [SELECT OwnerId FROM Contact WHERE email = '' LIMIT 1] ){
+            Task emailTask = new Task();
+            emailTask.OwnerId = c.OwnerId;
+            defaultEmails.add(emailTask);
+        }
+        insert defaultEmails;
+    }
+    
+    public void Challenge6(integer numberOfAccounts, integer numberOfContacts){
+        List<Account> accountsToAdd = new List<Account>();
+        List<Contact> contactsToAdd = new List<Contact>();
+        for(integer i = 0; i < numberOfAccounts; i++){
+            Account nAccount = new Account();
+            nAccount.Name = 'nAccount' + i;
+            nAccount.AnnualRevenue = i * 1000;
+            nAccount.Phone = '12345678';
+            nAccount.Site = 'Site' + i;
+            
+            accountsToAdd.add(nAccount);
+        }
+        INSERT accountsToAdd;
+        
+        for(Account j : accountsToAdd){
+            for(integer z = 0; z < numberOfContacts; z++){
+				contactsToAdd.add(GenerateContacts(j));
+            }
+        }
+        
+        INSERT contactsToAdd;
+    }
+    
+    public Contact GenerateContacts(Account parentAccount){
+        Contact nContact = new Contact();
+        nContact.LastName = parentAccount.Name + 'c';
+        nContact.FirstName = 'John';
+        nContact.Phone = '87654321';
+        nContact.Email = nContact.FirstName + '@' + parentAccount.Name + '.com';
+        nContact.AccountId = parentAccount.Id;
+        return nContact;
+    }
+    
+    public void UpdateChildContacts(){
+        List<Account> AccList = [SELECT phone, (SELECT id, phone FROM Contacts) FROM Account];
+        List<Contact> ConList = new List<Contact>();
+        for(Account a : AccList){
+            if(a.Contacts != null){
+            	List<Contact> curContacts = a.Contacts;
+            	for(Contact c: curContacts){
+                	c.Phone = a.Phone;
+                	conList.add(c);
+           		}
+            }
+        }
+        update conList;
+    }
+    
+    public void SystemLog(){
+        for(Contact c :[SELECT FirstName, LastName, Account.Name, Account.Phone, Account.Site FROM Contact]){
+            system.debug(c.FirstName + ' ' + c.LastName + ', From: ' + c.Account.Name + '. Reachable at: ' + c.Account.Phone + ' and ' + c.Account.Site);
+        }
+    }
+    
+    
 }
