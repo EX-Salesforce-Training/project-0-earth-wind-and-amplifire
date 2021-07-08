@@ -1,0 +1,100 @@
+public class Pokemon {
+    
+    /* Challenge I
+     * This method adds an Account to the database for each generation I pokemon
+     * with a Account Name in the format '<pokemonName> pokemon'.
+     */
+    public void addGenI() {
+        List<string> pokemonNames = new List<string>{'Bulbasaur', 'Ivysaur', 'Venusaur', 'Charmander', 'Charmeleon', 'Charizard', 'Squirtle', 'Wartortle', 'Blastoise', 'Caterpie', 'Metapod', 'Butterfree', 'Weedle', 'Kakuna', 'Beedrill', 'Pidgey', 'Pidgeotto', 'Pidgeot', 'Rattata', 'Raticate', 'Spearow', 'Fearow', 'Ekans', 'Arbok', 'Pikachu', 'Raichu', 'Sandshrew', 'Sandslash', 'Nidoran', 'Nidorina', 'Nidoqueen', 'Nidoran', 'Nidorino', 'Nidoking', 'Clefairy', 'Clefable', 'Vulpix', 'Ninetales', 'Jigglypuff', 'Wigglytuff', 'Zubat', 'Golbat', 'Oddish', 'Gloom', 'Vileplume', 'Paras', 'Parasect', 'Venonat', 'Venomoth', 'Diglett', 'Dugtrio', 'Meowth', 'Persian', 'Psyduck', 'Golduck', 'Mankey', 'Primeape', 'Growlithe', 'Arcanine', 'Poliwag', 'Poliwhirl', 'Poliwrath', 'Abra', 'Kadabra', 'Alakazam', 'Machop', 'Machoke', 'Machamp', 'Bellsprout', 'Weepinbell', 'Victreebel', 'Tentacool', 'Tentacruel', 'Geodude', 'Graveler', 'Golem', 'Ponyta', 'Rapidash', 'Slowpoke', 'Slowbro', 'Magnemite', 'Magneton', 'Farfetchd', 'Doduo', 'Dodrio', 'Seel', 'Dewgong', 'Grimer', 'Muk', 'Shellder', 'Cloyster', 'Gastly', 'Haunter', 'Gengar', 'Onix', 'Drowzee', 'Hypno', 'Krabby', 'Kingler', 'Voltorb', 'Electrode', 'Exeggcute', 'Exeggutor', 'Cubone', 'Marowak', 'Hitmonlee', 'Hitmonchan', 'Lickitung', 'Koffing', 'Weezing', 'Rhyhorn', 'Rhydon', 'Chansey', 'Tangela', 'Kangaskhan', 'Horsea', 'Seadra', 'Goldeen', 'Seaking', 'Staryu', 'Starmie', 'Mr. Mime', 'Scyther', 'Jynx', 'Electabuzz', 'Magmar', 'Pinsir', 'Tauros', 'Magikarp', 'Gyarados', 'Lapras', 'Ditto', 'Eevee', 'Vaporeon', 'Jolteon', 'Flareon', 'Porygon', 'Omanyte', 'Omastar', 'Kabuto', 'Kabutops', 'Aerodactyl', 'Snorlax', 'Articuno', 'Zapdos', 'Moltres', 'Dratini', 'Dragonair', 'Dragonite', 'Mewtwo', 'Mew'};
+        List<Account> newAccounts = new List<Account>();
+        for (string pokemonName : pokemonNames) {
+            Account a = new Account();
+            a.Name = pokemonName + ' pokemon';
+            newAccounts.add(a);
+        }
+        insert newAccounts;
+    }
+    
+    /* Challenge II
+     * This method deletes from the database all Accounts with an Account name
+     * of the form '%pokemon'. It will remove all Accounts added by the 
+     * addGenI method.
+     */
+    public void removeGenI() {
+        List<Account> stagedForDeleteAccounts = new List<Account>();
+        for (Account pokemonAccount : [SELECT id FROM Account A WHERE A.Name LIKE '%pokemon']) {
+            stagedForDeleteAccounts.add(pokemonAccount);
+        }
+        delete stagedForDeleteAccounts;
+    }
+    
+    /* Challenge III
+     * This method finds all Contacts missing an email address and/or a phone number.
+     * Any Contact field missing a value is updated with a default value.
+     */
+    public void addDefaultContactData() {
+        List<Contact> blankContacts = new List<Contact>();
+        for (Contact c : [SELECT email, phone FROM Contact WHERE email = NULL OR phone = NULL]) {
+            if (c.email == null) {
+                c.email = 'default@default.default';
+            }
+            if (c.phone == null) {
+                c.phone = '5555555555';
+            }
+            blankContacts.add(c);
+        }
+        update blankContacts;
+    }
+    
+    /* Challenge IV
+     * Creates 200 new contacts with the first name Bob and updates all existing
+     * contacts' first names to Bob.
+     */
+    public void bobsInvadeKanto() {
+        List<Contact> bobs = new List<Contact>();
+        for (Contact c : [SELECT FirstName FROM Contact WHERE NOT FirstName LIKE 'Bob']) {
+            c.FirstName = 'Bob';
+            bobs.add(c);
+        }
+        for (integer i=0; i<200; i++) {
+            Contact c = new Contact();
+            c.FirstName = 'Bob';
+            c.LastName = 'Bob' + i;
+            bobs.add(c);
+        }
+        upsert bobs;
+    }
+    
+    /* Challenge V
+     * Updates all contacts' phone numbers to be equal to their parent accounts' phone
+     * number.  Then creates a new task for each contact that is missing an email address.
+     */
+    public void parentsAmIRight() {
+        List<Contact> contacts = [SELECT Account.Phone, Phone FROM Contact];
+        List<Contact> stagedUpdates = new List<Contact>();
+        for (Contact c : contacts) {
+            if (c.Phone != c.Account.Phone) {
+                c.Phone = c.Account.Phone;
+                stagedUpdates.add(c);
+            }
+        }
+        update stagedUpdates;
+        
+        contacts = [SELECT Email, OwnerId FROM Contact WHERE email = NULL];
+        List<Task> newTasks = new List<Task>();
+        for (Contact c : contacts) {
+            if (c.Email == null) {
+                Task t = new Task();
+                t.Status = 'Not Started';
+                t.Subject = 'Email';
+                t.Priority = 'Normal';
+                t.Description = 'The email for this contact needs updated.';
+                t.WhoId = c.Id;
+                t.OwnerID = c.OwnerId;
+                newTasks.add(t);
+            }
+        }
+        insert newTasks;
+    }
+
+}
