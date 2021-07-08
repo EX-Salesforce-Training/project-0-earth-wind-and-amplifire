@@ -1,0 +1,53 @@
+public class Challenges {
+	List<Account> accountList;
+	List<Contact> contactList;
+    
+    public void AddAccounts(List accountList);
+    public void DeleteAccounts();
+    public void DefaultInfo(List contactList);
+    public void Bobverse(List contactList);
+}
+
+AddAccounts(List accountList){
+    Account a = new Account();
+    for(integer i = 0; i <= 150; i++){
+        a.Id = i;
+        accountList.add(a);
+    }
+}
+
+/*DeleteAccounts(List accountList){
+    (for i = 0; i < 151; i++){
+        accountList[a].delete();
+    }
+}*/
+
+DeleteAccounts(){
+    List<Account> toDelete;
+    for(Account a: [SELECT Id FROM Account WHERE Id < 151]){
+        delete toDelete;
+    }
+}
+
+DefaultInfo(List contactList){
+    Contact c = new Contact();
+    for (Contact c: [SELECT Email FROM Contact WHERE Email == '' ]){
+        c.Email = 'generic@email.com';
+    }
+
+    for(Contact c: [SELECT Phone FROM Phone WHERE Phone == '']){
+        c.Phone = '555-123-4567';
+    }
+    
+    update contactList;
+}
+
+Bobverse(List contactList){
+    for(i = 0; i < 200; i++){
+        Contact c = new Contact();
+        contactList.add(c)
+    }
+    insert contactList;
+    
+    
+}
