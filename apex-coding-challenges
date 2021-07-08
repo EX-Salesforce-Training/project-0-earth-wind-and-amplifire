@@ -1,0 +1,57 @@
+public class Challenges {
+    public void Challenge1(integer total){
+        //part1
+        List<Account> pokedex = new List<Account>();
+        
+        for (integer i=0; i<total; i++){
+            Account pokemon = new Account();
+            pokemon.name = 'pokemon' + i;
+            pokedex.add(pokemon);
+            system.debug(pokemon.Name);
+        }
+        insert pokedex;
+    }
+    public void Challenge2(){
+        //part2
+        
+        List<Account> pokedexToDelete = new List<Account>([SELECT id FROM Account WHERE name LIKE 'pokemon%']);
+        delete pokedexToDelete;
+    }
+    
+    public void Challenge3(){
+        //part3
+        List<Contact> defaultEmails = new List<Contact>();
+        for(Contact c: [SELECT email FROM Contact WHERE email = ''] ){
+            c.Email = 'default@default.com';
+            defaultEmails.add(c);
+        }
+        update defaultEmails;
+        
+        List<Contact> defaultPhones = new List<Contact>();
+        for(Contact c: [SELECT phone FROM Contact WHERE phone = ''] ){
+            c.Phone = '0000000000';
+            defaultPhones.add(c);
+        }
+        update defaultPhones;
+        
+    }
+    
+    public void Challenge4(){
+        List<Contact> councilOfBobs = new List<Contact>();
+        for(integer i = 0; i<200; i++){
+            Contact b = new Contact();
+            b.FirstName = 'Bob';
+            b.LastName = 'Bob';
+            councilOfBobs.add(b);
+        }
+        insert councilOfBobs;
+        
+        List<Contact> newBobs = new List<Contact>();
+        for(Contact c: [SELECT firstName FROM Contact WHERE firstName != 'Bob'] ){
+            c.FirstName = 'Bob';
+       		newBobs.add(c);
+        }
+        upsert newBobs;
+        
+    }
+}
