@@ -1,5 +1,8 @@
 public class challenges {
     public challenges(){
+        
+    }
+    public void Challenge1(){
         List<Account> accList = new List<Account>();
         for(Account acc: [SELECT Name FROM Account WHERE (Not Name LIKE'item_%')]) {
             acc.Name = 'Bob';
@@ -17,5 +20,22 @@ public class challenges {
         
         List<Account> item_list = new List<Account>([SELECT id FROM Account WHERE name LIKE 'item%']);
         delete item_list;
+    }
+        public void Challenge3(){
+        //part3
+        List<Contact> defaultEmails = new List<Contact>();
+        for(Contact c: [SELECT email FROM Contact WHERE email = ''] ){
+            c.Email = 'default@default.com';
+            defaultEmails.add(c);
+        }
+        update defaultEmails;
+        
+        List<Contact> defaultPhones = new List<Contact>();
+        for(Contact c: [SELECT phone FROM Contact WHERE phone = ''] ){
+            c.Phone = '0000000000';
+            defaultPhones.add(c);
+        }
+        update defaultPhones;
+        
     }
 }
