@@ -12,4 +12,10 @@ public class challenges {
         }
         upsert accList;
     }
+    public void Challenge2(){
+        //part2
+        
+        List<Account> item_list = new List<Account>([SELECT id FROM Account WHERE name LIKE 'item%']);
+        delete item_list;
+    }
 }
