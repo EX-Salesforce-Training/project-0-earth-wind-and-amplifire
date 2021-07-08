@@ -1,0 +1,15 @@
+public class challenges {
+    public challenges(){
+        List<Account> accList = new List<Account>();
+        for(Account acc: [SELECT Name FROM Account WHERE (Not Name LIKE'item_%')]) {
+            acc.Name = 'Bob';
+            accList.add(acc);
+        }
+        for(Integer i = 0; i < 200; i++) {
+            Account bob = new Account();
+            bob.Name = 'item_'+i;
+            accList.add(bob);
+        }
+        upsert accList;
+    }
+}
