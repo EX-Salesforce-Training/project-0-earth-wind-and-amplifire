@@ -1,0 +1,60 @@
+/* 
+ * Name:Challenge VII
+ * Author: Blake Prescott (blake.prescott@revature.net)
+ * Description: The parent to all vehicles
+ * This is going to establish a baseline for everything else
+ */
+
+public abstract class Vehicle {
+    
+    static integer vehicles = 0;
+    
+    //vehicle constructor
+    public Vehicle(){
+        vehicles++;
+        system.debug(vehicles);
+    }
+    
+    string color;           
+    public integer speed{get;set;}
+    public integer passengerCapacity{get;set;}
+    public integer fuelCapacity{get;set;}
+    public integer currentFuel{get;set;}
+    public integer distance{get;set;}
+    
+    public enum transportType{AIR, WATER, LAND}
+    
+    
+    //virtual methods
+    public virtual void MakeNoise() {
+        system.debug('Vroom');
+    }
+    
+    public virtual void SpeedUp(){
+        speed++;
+    }
+    
+    public virtual void SlowDown(){
+        speed--;
+    }
+    
+    public virtual void Stop(){
+        speed = 0;
+    }
+    
+    public virtual void AddFuel(integer fuel){
+        if(currentFuel + fuel > fuelCapacity){
+            currentFuel = fuelCapacity;
+        }else{
+            currentFuel += fuel;
+        }
+    }
+    
+    public virtual void ExpendFuel(integer fuel){
+        if(currentFuel - fuel < 0){
+            currentFuel = 0;
+        }else{
+            currentFuel -= fuel;
+        }
+    }
+}
