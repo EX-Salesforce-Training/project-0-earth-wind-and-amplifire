@@ -1,0 +1,13 @@
+/* 
+ * Name:Challenge VII
+ * Author: Blake Prescott (blake.prescott@revature.net)
+ * Description: The car interface, insures that we implement these methods
+ */
+
+public interface Car {
+    void HonkHorn();
+    void SpinWheels();
+    void ApplyBrakes();
+    void SlamBrakes();
+    integer GasMileage();
+}
