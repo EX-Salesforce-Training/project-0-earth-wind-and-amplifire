@@ -1,0 +1,102 @@
+/* 
+ * Name:Challenge VII
+ * Author: Blake Prescott (blake.prescott@revature.net)
+ * Description: The van class, inherits vehicle and implements car
+ * This is going the final class.
+ */
+
+public class Van extends Vehicle implements Car{
+    integer vanYear;
+    string vanMake;
+    string vanModel;
+    
+    //Default Van constructor
+    public Van(){
+        passengerCapacity = 6;
+        fuelCapacity = 100;
+        speed = 0;
+        distance = 0;
+        currentFuel = 0;
+        transportType Van = transportType.LAND;
+    }
+    
+    //chaining constructors
+    public Van(integer year){
+        this();
+        vanYear = year;
+    }
+    
+    public Van(string make){
+        this();
+        vanMake = make;
+    }
+    
+    public Van(string make, string model){
+        this(make);
+        vanModel = model;
+    }
+    
+    public Van(integer year, string make){
+        this(year);
+        vanMake = make;
+    }
+    
+    public Van(integer year, string make, string model){
+        this(year, make);
+        vanModel = model;
+    }
+    
+    //implementing methods from the interface
+    public void HonkHorn(){
+        system.debug('Honk');
+    }
+    
+    public void SpinWheels(){
+        if(currentFuel > GasMileage()){
+        	speedUp();
+        	currentFuel -= GasMileage();
+            //super's make noise instead of the van's
+        	super.MakeNoise();
+            distance += speed;
+            system.debug(distance);
+        }else{
+            system.debug('Youre out of gas!');
+            MakeNoise();
+        }
+    }
+    
+    public void ApplyBrakes(){
+        if(speed > 0){
+        	slowDown();
+            distance += speed;
+            system.debug(distance);
+        }else{
+            system.debug('You are not even moving!');
+        }
+    }
+    
+    public void SlamBrakes(){
+        Stop();
+    }
+    
+    public integer GasMileage(){
+        return 10;
+    }
+    
+    //overriding stop
+    public override void Stop(){
+        if(speed > 0){
+        	while(speed > 0){
+            	SlowDown();
+            	system.debug('Speed: ' + speed);
+        	}
+        }else{
+            system.debug('You are not even moving!');
+        }
+    }
+    
+    public override void MakeNoise(){
+        system.debug('crappy engine sounds');
+    }
+    
+}
