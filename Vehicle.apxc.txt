@@ -1,0 +1,103 @@
+/* ChallengeVII
+ * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
+ * Created Date: 7/9/2021
+ * Last Modified Date: 7/9/2021
+ * Description: A vehicle represents a mode of transportation such as
+ * 				a car, a train, an airplane, etc. This class is abstract
+ * 				and must be extended.
+ */
+
+public abstract class Vehicle {
+    
+    public enum Mode {LAND, WATER, AIR}
+    
+    Mode vehicleMode;
+    integer maxSpeed;
+    string speedUnit; // kmh, mph, etc.
+    /* The power source for a vehicle will vary by the type of vehicle.
+     * A car could be powered by gas or electricity. A ship can be powered
+     * by the wind or nuclear power.
+     */
+    string powerSource;
+    string name;
+    date dateCreated;
+    string manufacturer;
+    
+    // Sets this vehicles mode of transportation to vehicleMode
+    public virtual void setMode(Mode vehicleMode) {
+        this.vehicleMode = vehicleMode;
+    }
+    
+    // Gets this vehicles mode of transportation
+    public virtual Mode getMode() {
+        return vehicleMode;
+    }
+    
+    // Sets this vehicles maximum speed to maxSpeed
+    public virtual void setMaxSpeed(integer maxSpeed) {
+        this.maxSpeed = maxSpeed;
+    }
+    
+    // Returns the numeric value of this vehicles max speed.
+    // Must be associated with a unit to have meaning.
+    public virtual integer getMaxSpeed() {
+        return maxSpeed;
+    }
+    
+    // Sets the unit of this vehicle's speed (mph for example).
+    public virtual void setSpeedUnit(string unit) {
+        speedUnit = unit;
+    }
+    
+    // Gets the unit asscociated with this vehicle's speed.
+    public virtual string getSpeedUnit() {
+        return speedUnit;
+    }
+    
+    // Sets this vehicle's power source to powerSource
+    public virtual void setPowerSource(string powerSource) {
+        this.powerSource = powerSource;
+    }
+    
+    // Gets this vehicle's power source
+    public virtual string getPowerSource() {
+        return powerSource;
+    }
+    
+    // Sets this vehicle's name to name
+    public virtual void setName(string name) {
+        this.name = name;
+    }
+    
+    // Gets this vehicle's name
+    public virtual string getName() {
+        return name;
+    }
+    
+    // Sets this vehicle's creation date to createdOn
+    public virtual void setCreationDate(date createdOn) {
+        dateCreated = createdOn;
+    }
+    
+    // Gets this vehicle's creation date
+    public virtual date getCreationDate() {
+        return dateCreated;
+    }
+    
+    // Sets this vehicle's manufacturer to manufacturer
+    public virtual void setManufacturer(string manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+    
+    // Gets this vehicle's manufacturer
+    public virtual string getManufactuer() {
+        return manufacturer;
+    }
+    
+    // Increases a vehicle's speed.
+    public abstract void accelerate();
+    
+    // Decreases a vehicle's speed.
+    public abstract void decelerate();
+
+}

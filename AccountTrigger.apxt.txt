@@ -1,0 +1,29 @@
+trigger AccountTrigger on Account (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+    switch on trigger.operationType {
+        when BEFORE_INSERT {
+            AccountTriggerHandler.preventNewCaliforniaAccounts(trigger.new);
+        }
+        when BEFORE_UPDATE {
+            
+        }
+        when BEFORE_DELETE {
+            AccountTriggerHandler.preventOpenOpportunityAccountDeletion(trigger.old);
+        }
+        when AFTER_INSERT {
+            AccountTriggerHandler.createContactPlaceholder(trigger.new);
+        }
+        when AFTER_UPDATE {
+            
+        }
+        when AFTER_DELETE {
+            
+        }
+        when AFTER_UNDELETE {
+            
+        }
+        when else {
+            
+        }
+    }
+
+}
