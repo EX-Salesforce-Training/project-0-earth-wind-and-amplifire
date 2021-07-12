@@ -1,0 +1,90 @@
+trigger Challenge9AccountTrigger on Account (before insert, before update, before delete, after delete, after undelete, after update, after insert) {
+    Switch on Trigger.OperationType {	
+    	when BEFORE_INSERT{
+       		//check for californians
+        	AccountTriggerHandlerChallengeIX.checkForCalifornians(trigger.new);
+        }
+        when BEFORE_UPDATE{
+            
+        }
+        When BEFORE_DELETE{
+            //check if the accounts have opportunities whose stage isnt 'closed won' or 'closed lost'
+            AccountTriggerHandlerChallengeIX.checkForOpenOpportunities(trigger.old);
+        }
+        when AFTER_INSERT{
+            //check if they have contacts, add a placeholder if not
+            AccountTriggerHandlerChallengeIX.CheckForContacts(trigger.new);
+        }
+        when AFTER_UPDATE{
+            
+        }
+        when AFTER_DELETE{
+            
+        }
+        when AFTER_UNDELETE{
+            
+        }
+    }
+}
+
+
+-----------------------------------------------------------Handler------------------------------------------------------------------------------
+
+
+
+public class AccountTriggerHandlerChallengeIX {
+    
+    //Checks if the accounts have any open opportunities before deletion
+    public static void CheckForOpenOpportunities(List<Account> AccountsToDelete){
+        Set<ID> accountsToCheck = new Set<ID>();
+        for(account a : AccountsToDelete) {
+            accountsToCheck.add(a.id);              
+    	}
+        
+        List<Opportunity> opps = [SELECT stageName FROM opportunity WHERE (NOT stageName LIKE 'Closed %') AND ID IN: accountsToCheck];
+        
+        for(account a: accountsToDelete){
+            for(Opportunity o : opps){
+                if (a.Id == o.accountID){
+                    a.addError('This account still has open opportunities!');
+                }
+            }
+        }
+	}
+    
+    //Checks the accounts' billing state fields for CA
+    public static void CheckForCalifornians(List<Account> AccountsToInsert){
+        for(account a : AccountsToInsert) {
+            if(a.BillingState == 'CA'){
+                a.addError('This account is in California!');
+            }
+        }
+	}
+    
+    //Checks if newly created accounts have any contacts, creates a placeholder if they don't
+    public static void CheckForContacts(List<Account> AccountsCreated){
+        Set<ID> accountsToCheck = new Set<ID>();
+        List<Account> accountsWithoutContacts = new List<Account>();
+        List<Contact> contactsToAdd = new List<Contact>();
+        for(account a : AccountsCreated) {
+            accountsToCheck.add(a.id);
+            accountsWithoutContacts.add(a);
+    	}
+        List<Contact> accountContacts = [SELECT Contact.AccountID FROM Contact WHERE Contact.AccountID IN: accountsToCheck];
+        for(account b : AccountsCreated){
+            for(contact c : accountContacts){
+                integer matchedContacts = 0;
+                if(b.Id == c.accountID){
+                    matchedContacts++;
+                }
+                if(matchedContacts == 0){
+                    Contact placeholderContact = new Contact();
+                    placeholderContact.AccountId = b.Id;
+                	placeholderContact.LastName = 'Placeholder';
+                	contactsToAdd.add(placeholderContact);
+                }
+            }
+        }
+        insert contactsToAdd;
+	}
+}
