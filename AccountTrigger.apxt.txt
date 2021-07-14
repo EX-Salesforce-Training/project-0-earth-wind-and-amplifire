@@ -1,28 +1,15 @@
-trigger AccountTrigger on Account (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+/*
+ * Author: Gregory Mannerberg (gregory.mannberg@revature.net)
+ * Created Date: 7/13/2021
+ * Last Modified Date: 7/14/2021
+ * Description: Trigger for the Account object for p0
+ */
+
+trigger AccountTrigger on Account (after insert) {
+    
     switch on trigger.operationType {
-        when BEFORE_INSERT {
-            AccountTriggerHandler.preventNewCaliforniaAccounts(trigger.new);
-        }
-        when BEFORE_UPDATE {
-            
-        }
-        when BEFORE_DELETE {
-            AccountTriggerHandler.preventOpenOpportunityAccountDeletion(trigger.old);
-        }
         when AFTER_INSERT {
-            AccountTriggerHandler.createContactPlaceholder(trigger.new);
-        }
-        when AFTER_UPDATE {
-            
-        }
-        when AFTER_DELETE {
-            
-        }
-        when AFTER_UNDELETE {
-            
-        }
-        when else {
-            
+            AccountTriggerHandler.linkAwningsToNewAccount(trigger.new);
         }
     }
 
