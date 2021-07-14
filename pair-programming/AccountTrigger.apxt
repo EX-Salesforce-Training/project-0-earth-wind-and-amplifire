@@ -1,0 +1,22 @@
+// After an account record is removed from the recycle bin, make a task for the account owner to validate the record and update if needed.
+
+trigger AccountTrigger2 on Account (before insert, after undelete) {
+    
+    switch on trigger.operationType {
+        when AFTER_UNDELETE {
+            List<Task> newTasks = new List<Task>();
+            for (Account a : trigger.new) {
+                Task newTask = new Task();
+                newTask.ownerId = a.ownerId;
+                newTask.whatId = a.Id;
+                newTask.Subject = 'Validate account';
+                newTask.Priority = 'Normal';
+                newTask.Status = 'Not Started';
+                newTask.Description = 'This account was recently undeleted. Please validate all information.';
+                newTasks.add(newTask);
+            }
+            insert newTasks;
+        }
+    }
+
+}
