@@ -1,52 +1,66 @@
-/* Challenge IX
+/* 
  * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
- * Created Date: 7/9/2021
- * Last Modified Date: 7/9/2021
- * Description: Trigger handler for the AccountTrigger.
+ * Created Date: 7/13/2021
+ * Last Modified Date: 7/13/2021
+ * Description: Contains all methods related to AccountTrigger.
  */
 
 public class AccountTriggerHandler {
-    
-    // Prevents the deletion of Accounts with open Oppportunities.
-    public static List<Account> preventOpenOpportunityAccountDeletion(List<Account> accounts) {
-        for (Account a : [SELECT (SELECT StageName FROM Opportunities) FROM Account WHERE id in :accounts]) {
-            List<Opportunity> opps = a.Opportunities;
-            integer i = 0;
-            boolean err = false;
-            while (i<opps.size() && !err) {
-                if (opps[i].StageName != 'Closed Won' && opps[i].StageName != 'Closed Lost') {
-                    err = true;
-                    a.addError('This Account still has an Opportunity that is not Closed Won or Closed Lost');
-                }
-                i++;
-            }
-        }
-        return accounts;
-    }
-    
-    // Prevents the creation of new Accounts based in California.
-    public static List<Account> preventNewCaliforniaAccounts(List<Account> newAccounts) {
-        for (Account a : newAccounts) {
-            if (a.BillingState == 'CA') {
-                a.addError('We are not accepting new Accounts based out of California right now.');
-            }
-        }
-        return newAccounts;
-    }
-    
-    // Creates a placeholder Contact for a new Account that doesn't have a related Contact
-    public static List<Account> createContactPlaceholder(List<Account> newAccounts) {
-        List<Contact> contacts = new List<Contact>();
-        for (Account a : [SELECT Name, (SELECT LastName FROM Contacts) FROM Account WHERE Id in :newAccounts]) {
-            if (a.Contacts.isEmpty()) {
-                Contact c = new Contact();
-                c.LastName = a.Name;
-                c.AccountId = a.Id;
-                contacts.add(c);
-            }
-        }
-        insert contacts;
-        return newAccounts;
-    }
 
+    // When a property owner sells their property that has awnings, the awnings
+    // transfer to the new property owner as they are tied to the location. When
+    // a new account is created for the new owner, the awnings related to the old
+    // account should be linked to the new account.
+    public static void linkAwningsToNewAccount(List<Account> newAccounts) {
+        system.debug('This is my list of new accounts: ' + newAccounts);
+        List<CustomAddress> addresses = new List<CustomAddress>();
+        Map<CustomAddress, Account> newAccountMap = new Map<CustomAddress, Account>();
+        for (Account a : newAccounts) {
+            CustomAddress addr = new CustomAddress(a.ShippingStreet, a.ShippingCity, a.ShippingState, a.ShippingPostalCode, a.ShippingCountry);
+            addresses.add(addr);
+            newAccountMap.put(addr, a);
+        }
+        system.debug('This is my list of new account shipping addresses: ' + addresses);
+        system.debug('This is my map of addresses to new accounts: ' + newAccountMap);
+        List<Account> oldOwners = [SELECT ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry, (SELECT Account__c FROM Awnings__r) FROM Account WHERE NOT Id IN :newAccounts];
+        Map<CustomAddress, List<Awning__c>> oldOwnerMap = new Map<CustomAddress, List<Awning__c>>();
+        system.debug('This is my list of old accounts: ' + oldOwners);
+        for (Account a : oldOwners) {
+            for (CustomAddress addr : addresses) {
+                if (a.ShippingStreet == addr.street && a.ShippingCity == addr.city && a.ShippingState == addr.state && a.ShippingPostalCode == addr.postalCode && a.ShippingCountry == addr.country) {
+            		oldOwnerMap.put(addr, a.Awnings__r);
+                    system.debug(a.Awnings__r);
+            	}
+            }
+        }
+        system.debug('This is my map of addresses to old accounts: ' + oldOwnerMap);
+        List<Awning__c> awningUpdates = new List<Awning__c>();
+        for (CustomAddress addr : addresses) {
+            for (Awning__c awn : oldOwnerMap.get(addr)) {
+                system.debug('Updating the info for awning: ' + awn);
+                awn.Account__c = newAccountMap.get(addr).Id;
+                awningUpdates.add(awn);
+            }
+        }
+        system.debug('These are my awnings to be updated: ' + awningUpdates);
+        update awningUpdates;
+        
+        
+    }
+    
+    public class CustomAddress {
+        public string street {get; set;}
+        public string city {get; set;}
+        public string state {get; set;}
+        public string postalCode {get; set;}
+        public string country {get; set;}
+        
+        public CustomAddress(string street, string city, string state, string postalCode, string country) {
+            this.street = street;
+            this.city = city;
+            this.state = state;
+            this.postalCode = postalCode;
+            this.country = country;
+        }
+    }
 }
