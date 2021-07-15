@@ -1,7 +1,8 @@
 /*
+ * Name: AccountTrigger
  * Author: Gregory Mannerberg (gregory.mannberg@revature.net)
  * Created Date: 7/13/2021
- * Last Modified Date: 7/14/2021
+ * Last Modified Date: 7/15/2021
  * Description: Trigger for the Account object for p0
  */
 

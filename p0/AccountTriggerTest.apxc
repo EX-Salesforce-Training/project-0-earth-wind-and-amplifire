@@ -1,0 +1,157 @@
+/*
+ * Name: AccountTriggerTest
+ * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
+ * Created Date: 7/15/2021
+ * Last Modified Date: 7/15/2021
+ * Description: Tests the functionality of the AccountTrigger trigger.
+ */
+
+@isTest
+public class AccountTriggerTest {
+    
+    /* This method tests whether the method linkAwningsToNewAccount properly
+     * fires on after insert and links awnings that belong to an existing account
+     * to a newly created account that has the same shipping address as
+     * the existing account.
+     */
+    @isTest
+    public static void linkAwningsSinglePositiveTest() {
+        // Create an account as part of db setup
+        Account existingAccount = new Account();
+        existingAccount.name = 'oldOwner';
+        existingAccount.type = 'Customer';
+        existingAccount.shippingStreet = '123 Oak St';
+        existingAccount.shippingCity = 'TownCity';
+        existingAccount.shippingState = 'OH';
+        existingAccount.ShippingPostalCode = '12345';
+        existingAccount.ShippingCountry = 'USA';
+        insert existingAccount;
+        
+        // Link 3 awnings to that account as part of db setup
+        List<Awning__c> awnings = new List<Awning__c>();
+        for (integer i=0; i<3; i++) {
+            Awning__c awn = new Awning__c();
+            awn.account__c = existingAccount.id;
+            awn.type__c = 'Window';
+            awnings.add(awn);
+        }
+        insert awnings;
+        
+        // Create and insert a new account to test trigger
+        Account newAccount = new Account();
+        newAccount.name = 'newOwner';
+        newAccount.type = 'Customer';
+        newAccount.shippingStreet = '123 Oak St';
+        newAccount.shippingCity = 'TownCity';
+        newAccount.shippingState = 'OH';
+        newAccount.ShippingPostalCode = '12345';
+        newAccount.ShippingCountry = 'USA';
+        insert newAccount;
+        
+        // Check that the awnings were transferred to the new account since the address
+        // matches the address of the old account.
+        Account check = [SELECT id, (SELECT id FROM Awnings__r) FROM Account WHERE name = 'newOwner' LIMIT 1];
+        system.assert(!check.Awnings__r.isEmpty());
+    }
+    
+    /* This method tests whether the method linkAwningsToNewAccount properly
+     * fires on after insert and does not link awnings that belong to an existing account
+     * to a newly created account that has a different shipping address from
+     * the existing account.
+     */
+    @isTest
+    public static void linkAwningsSingleNegativeTest() {
+        // Create an account as part of db setup
+        Account existingAccount = new Account();
+        existingAccount.name = 'oldOwner';
+        existingAccount.type = 'Customer';
+        existingAccount.shippingStreet = '123 Oak St';
+        existingAccount.shippingCity = 'TownCity';
+        existingAccount.shippingState = 'OH';
+        existingAccount.ShippingPostalCode = '12345';
+        existingAccount.ShippingCountry = 'USA';
+        insert existingAccount;
+        
+        // Link 3 awnings to that account as part of db setup
+        List<Awning__c> awnings = new List<Awning__c>();
+        for (integer i=0; i<3; i++) {
+            Awning__c awn = new Awning__c();
+            awn.account__c = existingAccount.id;
+            awn.type__c = 'Window';
+            awnings.add(awn);
+        }
+        insert awnings;
+        
+        // Create and insert a new account to test trigger
+        Account newAccount = new Account();
+        newAccount.name = 'newOwner';
+        newAccount.type = 'Customer';
+        newAccount.shippingStreet = '123 Pine St';
+        newAccount.shippingCity = 'TownCity';
+        newAccount.shippingState = 'OH';
+        newAccount.ShippingPostalCode = '12345';
+        newAccount.ShippingCountry = 'USA';
+        insert newAccount;
+        
+        // Check that the awnings were not transferred to the new account since the address
+        // does not match the address of the old account.
+        Account check = [SELECT id, (SELECT id FROM Awnings__r) FROM Account WHERE name = 'newOwner' LIMIT 1];
+        system.assert(check.Awnings__r.isEmpty());
+    }
+    
+    /* This method tests the linkAwningsToNewAccount method on multiple new Accounts at once
+     * and checks to make sure the right awnings are being assigned to the right new Account.
+     * This check is done by having the street number of the old and new accounts match the
+     * width field in related awnings.
+     */
+    @isTest
+    public static void linkAwningsMultiplePositiveTest() {
+        multipleSetup();
+        List<Account> newAccounts = new List<Account>();
+        for (integer i=0; i<10; i++) {
+            Account a = new Account();
+            a.name = 'new' + i;
+            a.type = 'Customer';
+            a.shippingStreet = i + ' Oak St';
+            a.shippingCity = 'TownCity' + i;
+            a.shippingState = 'OH';
+            a.ShippingPostalCode = '0000' + i;
+            a.ShippingCountry = 'USA';
+            newAccounts.add(a);
+        }
+        insert newAccounts;
+        newAccounts = [SELECT shippingStreet,(SELECT width__c FROM Awnings__r) FROM Account WHERE name LIKE 'new%'];
+        for (Account a : newAccounts) {
+            integer i = integer.valueOf(a.ShippingStreet.split(' ')[0]);
+            for (Awning__c awn : a.Awnings__r) {
+                system.assertEquals(i, awn.width__c);
+            }
+        }
+    }
+    
+    private static void multipleSetup() {
+        List<Account> accounts = new List<Account>();
+        for (integer i=0; i<10; i++) {
+            Account a = new Account();
+            a.name = 'test' + i;
+            a.type = 'Customer';
+            a.shippingStreet = i + ' Oak St';
+            a.shippingCity = 'TownCity' + i;
+            a.shippingState = 'OH';
+            a.ShippingPostalCode = '0000' + i;
+            a.ShippingCountry = 'USA';
+            accounts.add(a);
+        }
+        insert accounts;
+        List<Awning__c> awnings = new List<Awning__c>();
+        for (integer i=0; i<20; i++) {
+            Awning__c awn = new Awning__c();
+            awn.Account__c = accounts[Math.mod(i,10)].id;
+            awn.type__c = 'Window';
+            awn.width__c = Math.mod(i,10);
+            awnings.add(awn);
+        }
+        insert awnings;
+    }
+
+}
