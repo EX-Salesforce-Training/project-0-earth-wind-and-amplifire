@@ -2,7 +2,7 @@
  * Name: AccountTriggerTest
  * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
  * Created Date: 7/15/2021
- * Last Modified Date: 7/15/2021
+ * Last Modified Date: 7/16/2021
  * Description: Tests the functionality of the AccountTrigger trigger.
  */
 
@@ -127,6 +127,19 @@ public class AccountTriggerTest {
                 system.assertEquals(i, awn.width__c);
             }
         }
+    }
+    
+    /* Tests that inserting an account without an address is not stopped by
+     * linkAwningsToNewAccount throwing a null pointer exception by not having
+     * an address to access.
+     */
+    @isTest
+    public static void noAddressTest() {
+        Account a = new Account();
+        a.name = 'test';
+        insert a;
+        a = [SELECT Id FROM Account LIMIT 1];
+        system.assert(a.id != null);
     }
     
     private static void multipleSetup() {
