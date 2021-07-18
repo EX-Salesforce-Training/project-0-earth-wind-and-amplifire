@@ -1,7 +1,7 @@
 /* Name: P0 Request Object Trigger Helper
  * Author: Blake Prescott(blake.prescott@revature.net)
  * Created Date: 7/12/21 
- * Last Modified Date: 7/13/21
+ * Last Modified Date: 7/18/21
  * Description: This is the trigger helper for the Request object for my P0, the Fantasy Guild Org.
  */
 public class RequestTriggerHandler {
@@ -46,7 +46,7 @@ public class RequestTriggerHandler {
             r.Request_Postal_Code__c = acc.billingPostalCode;
             system.debug(r.Request_Postal_Code__c);
             
-            if(r.Location__c == null){ 
+            if(r.Location__c == null && r.Request_Street__c != null && r.Request_City__c != null && r.Request_State__c != null && r.Request_Country__c != null && r.Request_Postal_Code__c != null){ 
                 r.Location__c = r.Request_Street__c + ', ' + r.Request_City__c + ', ' + r.Request_State__c + ' ' + r.Request_Postal_Code__c + ', ' + r.Request_Country__c;
                 system.debug(r.location__c);
             }
@@ -75,10 +75,6 @@ public class RequestTriggerHandler {
             }else if(r.Request_Details__c == null && acc.phone == null && r.Location__c != null){
                 r.Request_Details__c = 'Speak with the client at ' + r.Location__c + ' for more details.';
                 system.debug(r.Request_Details__c + 'Second if fired');
-                
-            }else if(r.Request_Details__c == null && acc.phone == null && r.Location__c == null && r.Request_Street__c != null && r.Request_City__c != null && r.Request_State__c != null && r.Request_Country__c != null && r.Request_Postal_Code__c != null){
-                r.Request_Details__c = 'Speak with the client at' + r.Request_Street__c + ', ' + r.Request_City__c + ', ' + r.Request_State__c + ' ' + r.Request_Postal_Code__c + ', ' + r.Request_Country__c + '.';
-            	system.debug(r.Request_Details__c + 'Third if fired');
                 
             }else if(r.Request_Details__c == null && acc.phone == null && r.Location__c == null && r.Request_Street__c == null && r.Request_City__c == null && r.Request_State__c == null && r.Request_Country__c == null && r.Request_Postal_Code__c == null){
                 r.addError('Insuffecient contact information for this request\'s details to be left blank! Provide details for this request or update the client account\'s contact information!');
