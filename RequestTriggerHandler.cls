@@ -80,7 +80,7 @@ public class RequestTriggerHandler {
                 r.Request_Details__c = 'Speak with the client at' + r.Request_Street__c + ', ' + r.Request_City__c + ', ' + r.Request_State__c + ' ' + r.Request_Postal_Code__c + ', ' + r.Request_Country__c + '.';
             	system.debug(r.Request_Details__c + 'Third if fired');
                 
-            }else{
+            }else if(r.Request_Details__c == null && acc.phone == null && r.Location__c == null && r.Request_Street__c == null && r.Request_City__c == null && r.Request_State__c == null && r.Request_Country__c == null && r.Request_Postal_Code__c == null){
                 r.addError('Insuffecient contact information for this request\'s details to be left blank! Provide details for this request or update the client account\'s contact information!');
             }
         }
