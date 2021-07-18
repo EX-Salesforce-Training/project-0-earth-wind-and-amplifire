@@ -15,11 +15,6 @@ public class RequestTriggerHandler {
         }
         List<Account> clientAccs = [SELECT billingStreet, billingCity, billingState, billingCountry, billingPostalCode FROM Account WHERE ID IN : clientIds];
         
-        //for(Request__c r : [SELECT location__c, Request_Street__c, Request_City__c, Request_State__C, Request_Country__c, Request_Postal_Code__c, 
-        //    Client_Account__c, Client_Account__r.billingStreet, Client_Account__r.billingCity, Client_Account__r.billingState, Client_Account__r.billingCountry, 
-        //    Client_Account__r.billingPostalCode FROM Request__c WHERE ID IN : reqs]){
-            
-        
         for(Request__c r: reqs){
             
             Account acc;
@@ -59,21 +54,33 @@ public class RequestTriggerHandler {
     }
     
     public static void SetDefaultDescription(List<Request__c> reqs){
-        for(Request__c r : [SELECT Request_Details__c, location__c, Client_Account__r.phone, Request_Street__c, Request_City__c, Request_State__C, Request_Country__c, Request_Postal_Code__c, Client_Account__c, Client_Account__r.billingStreet, Client_Account__r.billingCity, Client_Account__r.billingState, Client_Account__r.billingCountry, Client_Account__r.billingPostalCode FROM Request__c WHERE ID IN : reqs]){
-            if(r.Request_Details__c == null && r.Client_Account__r.phone != null){
-                r.Request_Details__c = 'Call ' + r.Client_Account__r.phone + ' to speak with the client for further details.';
+        List<ID> clientIds = new List<ID>();
+        for(Request__c r : reqs){
+            clientIds.add(r.Client_Account__c);
+        }
+        List<Account> clientAccs = [SELECT billingStreet, billingCity, billingState, billingCountry, billingPostalCode, phone FROM Account WHERE ID IN : clientIds];
+        
+        for(Request__c r : reqs){
+            Account acc;
+            for(Account a : clientAccs){
+                if(a.id == r.Client_Account__c){
+                    acc = a;
+                    break;
+                }
+            }
+            if(r.Request_Details__c == null && acc.phone != null){
+                r.Request_Details__c = 'Call ' + acc.phone + ' to speak with the client for further details.';
                 system.debug(r.Request_Details__c + 'First if fired');
                 
-            }else if(r.Request_Details__c == null && r.Client_Account__r.phone == null && r.Location__c != null){
+            }else if(r.Request_Details__c == null && acc.phone == null && r.Location__c != null){
                 r.Request_Details__c = 'Speak with the client at ' + r.Location__c + ' for more details.';
                 system.debug(r.Request_Details__c + 'Second if fired');
                 
-            }else if(r.Request_Details__c == null && r.Client_Account__r.phone == null && r.Location__c == null && r.Request_Street__c != null && r.Request_City__c != null && r.Request_State__c != null && r.Request_Country__c != null && r.Request_Postal_Code__c != null){
+            }else if(r.Request_Details__c == null && acc.phone == null && r.Location__c == null && r.Request_Street__c != null && r.Request_City__c != null && r.Request_State__c != null && r.Request_Country__c != null && r.Request_Postal_Code__c != null){
                 r.Request_Details__c = 'Speak with the client at' + r.Request_Street__c + ', ' + r.Request_City__c + ', ' + r.Request_State__c + ' ' + r.Request_Postal_Code__c + ', ' + r.Request_Country__c + '.';
             	system.debug(r.Request_Details__c + 'Third if fired');
                 
             }else{
-                //if(r.Request_Details__c == null && r.Client_Account__r.phone == null && r.Location__c == null && r.Request_Street__c == null && r.Request_City__c == null && r.Request_State__c == null && r.Request_Country__c == null && r.Request_Postal_Code__c == null){
                 r.addError('Insuffecient contact information for this request\'s details to be left blank! Provide details for this request or update the client account\'s contact information!');
             }
         }
