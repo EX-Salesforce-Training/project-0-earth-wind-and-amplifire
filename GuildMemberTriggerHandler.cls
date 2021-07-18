@@ -1,6 +1,6 @@
 /* Name: P0 Guild Member Object Trigger Handler
  * Author: Blake Prescott(blake.prescott@revature.net)
- * Created Date: 7/16/21 
+ * Created Date: 7/18/21 
  * Last Modified Date: 7/18/21
  * Description: This is the handler for the Guild Member trigger.
  */

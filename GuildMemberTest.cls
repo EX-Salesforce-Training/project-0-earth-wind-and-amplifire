@@ -1,6 +1,6 @@
 /* Name: P0 Guild Member Object Trigger Handler Tests
  * Author: Blake Prescott(blake.prescott@revature.net)
- * Created Date: 7/16/21 
+ * Created Date: 7/18/21 
  * Last Modified Date: 7/18/21
  * Description: This is the test class for the guild member trigger. I did tests for success and failure but bulk tests in this particular case don't
  * make a lot of sense to me since nothing in the triggers interacts with anything outside of the record.
