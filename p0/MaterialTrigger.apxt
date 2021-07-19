@@ -1,0 +1,17 @@
+/* 
+ * Name: MaterialTrigger
+ * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
+ * Created Date: 7/19/2021
+ * Last Modified Date: 7/19/2021
+ * Description: Trigger for the Materiall__c object for p0
+ */
+
+trigger MaterialTrigger on Material__c (before delete) {
+    
+    switch on trigger.operationType {
+        when BEFORE_DELETE {
+            MaterialTriggerHandler.verifyZero(trigger.old);
+        }
+    }
+
+}

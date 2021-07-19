@@ -1,0 +1,130 @@
+/*
+ * Name: MaterialTriggerTest
+ * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
+ * Created Date: 7/19/2021
+ * Last Modified Date: 7/19/2021
+ * Description: Tests the functionality of the MaterialTrigger
+ */
+
+@isTest
+public class MaterialTriggerTest {
+    
+    /*
+     * deleteSingleCanvas is a test to make sure that a 
+     * single Material__c canvas record does get deleted
+     * when it has 0 length.
+     */
+    @isTest
+    public static void deleteSingleCanvas() {
+        Material__c mat = new Material__c();
+        mat.name = 'test';
+        mat.length__C = 0;
+        insert mat;
+        delete mat;
+        mat = [SELECT isDeleted FROM Material__c WHERE isDeleted = true LIMIT 1 ALL ROWS];
+        system.assert(mat.IsDeleted);       
+    }
+    
+    /*
+     * This method tests that a canvas record with length greater than 
+     * 0 does not get deleted.
+     */
+    @isTest
+    public static void failDeleteSingleCanvas() {
+        Material__c mat = new Material__c();
+        mat.name = 'test';
+        mat.Length__c = 100;
+        insert mat;
+        try {
+        	delete mat;
+        }
+        catch (DmlException e) {
+            mat = [SELECT isDeleted FROM Material__c WHERE isDeleted = false LIMIT 1];
+        }
+        finally {
+
+            system.assert(!mat.IsDeleted);
+        }
+    }
+    
+    /* 
+     * This method tests deleting a single hardware record with
+     * a count 0.
+     */
+    @isTest
+    public static void deleteSingleHardware() {
+        Material__c mat = new Material__c();
+        mat.name = 'test';
+        mat.recordTypeId = Schema.SObjectType.Material__c.getRecordTypeInfosByName().get('Hardware').getRecordTypeId();
+        mat.Count__c = 0;
+        insert mat;
+        delete mat;
+        mat = [SELECT isDeleted FROM Material__c WHERE isDeleted = true LIMIT 1 ALL ROWS];
+        system.assert(mat.IsDeleted);
+    }
+    
+    /* 
+     * This method tests that a hardware record with a count
+     * greater than 0 is not deleted.
+     */
+    @isTest
+    public static void failDeleteSingleHardware() {
+        Material__c mat = new Material__c();
+        mat.name = 'test';
+        mat.recordTypeId = Schema.SObjectType.Material__c.getRecordTypeInfosByName().get('Hardware').getRecordTypeId();
+        mat.count__c = 19;
+        insert mat;
+        try {
+            delete mat;
+        }
+        catch (DmlException e) {
+            mat = [SELECT isDeleted FROM Material__c WHERE isDeleted = false LIMIT 1];
+        }
+        finally {           
+            system.assert(!mat.IsDeleted);
+        }
+    }
+    
+    /* 
+     * This method is a bulk test on deleting canvas records.
+     */
+    @isTest
+    public static void deleteBulkCanvas() {
+        List<Material__c> materials = new List<Material__c>();
+        for (integer i=0; i<10; i++) {
+            Material__c mat = new Material__c();
+            mat.name = 'test' + i;
+            mat.RecordTypeId = Schema.SObjectType.Material__c.getRecordTypeInfosByName().get('Canvas').getRecordTypeId();
+            mat.length__c = 0;
+            materials.add(mat);
+        }
+        insert materials;
+        delete materials;
+        materials = [SELECT isDeleted FROM Material__c WHERE isDeleted = true LIMIT 10 ALL ROWS];
+        for (Material__c mat : materials) {
+            system.assert(mat.IsDeleted);
+        }
+    }
+    
+    /* 
+     * This method is a bulk test on deleting hardware records.
+     */
+    @isTest
+    public static void deleteBulkHardware() {
+        List<Material__c> materials = new List<Material__c>();
+        for (integer i=0; i<10; i++) {
+            Material__c mat = new Material__c();
+            mat.name = 'test' + i;
+            mat.RecordTypeId = Schema.SObjectType.Material__c.getRecordTypeInfosByName().get('Hardware').getRecordTypeId();
+            mat.length__c = 0;
+            materials.add(mat);
+        }
+        insert materials;
+        delete materials;
+        materials = [SELECT isDeleted FROM Material__c WHERE isDeleted = true LIMIT 10 ALL ROWS];
+        for (Material__c mat : materials) {
+            system.assert(mat.IsDeleted);
+        }
+    }
+
+}

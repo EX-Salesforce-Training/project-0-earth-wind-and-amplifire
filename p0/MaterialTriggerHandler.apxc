@@ -1,0 +1,35 @@
+/*
+ * Name: MaterialTriggerHandler
+ * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
+ * Created Date: 7/19/2021
+ * Last Modified Date: 7/19/2021
+ * Description: Contains all of the logic of the MaterialTrigger within its
+ *              methods.
+ */
+
+public class MaterialTriggerHandler {
+    
+    /*
+     * Verifies that the material has been used before deleting it.
+     * Canvas materials must have 0 length left to be deleted.
+     * Hardware must have a count of 0 to be deleted.
+     */
+    public static void verifyZero(List<Material__c> materials) {
+        for (Material__c material : materials) {
+            string recordLabel = Schema.SObjectType.Material__c.getRecordTypeInfosById().get(material.RecordTypeId).getName();
+            switch on recordLabel {
+                when 'Canvas' {
+                    if (material.length__c > 0) {
+                        material.addError('Canvas length must be 0 to delete.');
+                    }
+                }
+                when 'Hardware' {
+                    if (material.count__c > 0) {
+                        material.addError('Hardware count must be 0 to delete.');
+                    }
+                }
+            } 
+        }
+    }
+
+}
