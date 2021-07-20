@@ -1,0 +1,194 @@
+/* 
+ * Name: JobTriggerTest
+ * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
+ * Created Date: 7/19/2021
+ * Last Modified Date: 7/19/2021
+ * Description: Tests the functionality of the JobTrigger.
+ */
+
+@isTest
+public class JobTriggerTest {
+    
+    private static void singleSetup() {
+        Account acc = new Account();
+        acc.name = 'test';
+        insert acc;
+        acc = [SELECT id FROM Account LIMIT 1];
+        Job__c job = new Job__c();
+        job.Account__c = acc.id;
+        insert job;
+        job = [SELECT id, actual_time_to_complete__c, completed__c, date_completed__c FROM Job__c LIMIT 1];
+        Awning__c awn = new Awning__c();
+        awn.type__c = 'Window';
+        insert awn;
+        awn = [SELECT id FROM Awning__c LIMIT 1];
+        Task__c t = new Task__c();
+        t.Completed__c = false;
+        t.Job__c = job.id;
+        t.Awning__c = awn.id;
+        insert t;        
+    }
+    
+    /*
+     * Test that an incomplete job isn't prevented from being updated.
+     */
+    @isTest
+    public static void incompleteUpdate() {
+        singleSetup();
+        Job__c job = [SELECT actual_time_to_complete__c FROM job__c LIMIT 1];
+        job.Actual_Time_to_Complete__c = 10;
+        try {
+            update job;
+        }
+        catch (DmlException e) {
+            system.assert(false);
+        }
+    }
+    
+    /* 
+     * Test that a job with a completed task, completion date, and
+     * completion time can be set to completed.
+     */
+    @isTest
+    public static void singleComplete() {
+        singleSetup();
+        Task__c t = [SELECT completed__c FROM Task__c LIMIT 1];
+        t.Completed__c = true;
+        update t;
+		Job__c job = [SELECT id, actual_time_to_complete__c, date_completed__c, completed__c FROM Job__c LIMIT 1];
+        job.Actual_Time_to_Complete__c = 30;
+        job.Date_Completed__c = system.date.today();
+        job.Completed__c = true;
+        update job;
+        job = [SELECT completed__c FROM Job__c LIMIT 1];
+        system.assert(job.Completed__c);
+    }
+    
+    /*
+     * Test that a job without a completion date will get rejected.
+     */
+    @isTest
+    public static void missingCompletionDate() {
+        singleSetup();
+        Task__c t = [SELECT completed__c FROM Task__c LIMIT 1];
+        t.Completed__c = true;
+        update t;
+		Job__c job = [SELECT id, actual_time_to_complete__c, date_completed__c, completed__c FROM Job__c LIMIT 1];
+        job.Actual_Time_to_Complete__c = 30;
+        job.Completed__c = true;
+        try {
+            update job;
+        }
+        catch (DmlException e) {
+            job = [SELECT date_completed__c, completed__c FROM Job__c LIMIT 1];
+            system.debug('Here' + job.Completed__c + ' ' + job.Date_Completed__c);
+        }
+        finally {
+            system.assert(!job.Completed__c);
+        }
+    }
+    
+    /*
+     * Tests that a job that is missing an actual completion time is not set to complete
+     */
+    @isTest
+    public static void missingCompletionTime() {
+        singleSetup();
+        Task__c t = [SELECT completed__c FROM Task__c LIMIT 1];
+        t.Completed__c = true;
+        update t;
+		Job__c job = [SELECT id, actual_time_to_complete__c, date_completed__c, completed__c FROM Job__c LIMIT 1];
+        job.Date_Completed__c = system.date.today();
+        job.Completed__c = true;
+        try {
+            update job;
+        }
+        catch (DmlException e) {
+            job = [SELECT actual_time_to_complete__c, completed__c FROM Job__c LIMIT 1];
+        }
+        finally {
+            system.assert(!job.Completed__c);
+        }
+    }
+    
+    /* 
+     * Tests that a job with an incomplete task cannot be completed.
+     */
+    @isTest
+    public static void missingTask() {
+        singleSetup();
+		Job__c job = [SELECT id, actual_time_to_complete__c, date_completed__c, completed__c FROM Job__c LIMIT 1];
+        job.Actual_Time_to_Complete__c = 30;
+        job.Date_Completed__c = system.date.today();
+        job.Completed__c = true;
+        try {
+            update job;
+        }
+        catch (DmlException e) {
+            job = [SELECT completed__c FROM Job__c LIMIT 1];
+        }
+        finally {
+            system.assert(!job.Completed__c);
+        }
+    }
+    
+    /*
+     * Tests bulk updating of jobs without completed tasks
+     */
+    @isTest
+    public static void bulkMissingTasks() {
+        List<Account> accounts = new List<Account>();
+        for (integer i=0; i<10; i++) {
+            Account a = new Account();
+            a.name = 'test' + i;
+            accounts.add(a);
+        }
+        insert accounts;
+        accounts = [SELECT id FROM Account LIMIT 10];
+        List<Job__c> jobs = new List<Job__c>();
+        List<Awning__c> awnings = new List<Awning__c>();
+        for (Account a : accounts) {
+            Job__c job = new Job__c();
+            job.Account__c = a.id;
+            jobs.add(job);
+            Awning__c awn = new Awning__c();
+            awn.Account__c = a.id;
+            awn.Type__c = 'Window';
+            awnings.add(awn);
+        }
+        insert jobs;
+        insert awnings;
+        jobs = [SELECT account__c, actual_time_to_complete__c, date_completed__c, completed__c FROM Job__c LIMIT 10];
+        awnings = [SELECT account__c FROM Awning__c LIMIT 10];
+        List<Task__c> tasks = new List<Task__c>();
+        for (Job__c job : jobs) {
+            for (Awning__c awn : awnings) {
+                if (job.Account__c == awn.Account__c) {
+                    Task__c t = new Task__c();
+                    t.Awning__c = awn.id;
+                    t.Job__c = job.id;
+                    t.Completed__c = false;
+                    tasks.add(t);
+                }
+            }
+        }
+        insert tasks;
+        
+        for (Job__c job : jobs) {
+            job.Actual_Time_to_Complete__c = 10;
+            job.Date_Completed__c = system.date.today();
+            job.Completed__c = true;
+        }
+
+        try {
+            update jobs;
+        }
+        catch (DmlException e) {
+            jobs = [SELECT completed__c FROM Job__c LIMIT 1];
+        }
+        finally {
+            system.assert(!jobs[0].completed__c);
+        }
+    }
+
+}

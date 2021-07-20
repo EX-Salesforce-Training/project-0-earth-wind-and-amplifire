@@ -1,0 +1,36 @@
+/*
+ * Name: JobTriggerHandler
+ * Author: Gregory Mannerberg (gregory.mannerberg@revature.net)
+ * Created Date: 7/19/2021
+ * Last Modified Date: 7/19/2021
+ * Description: Handles all of the logic for the JobTrigger.
+ */
+
+public class JobTriggerHandler {
+
+    /*
+     * Checks that all subtasks for a job are completed, that a
+     * completion date has been entered, and that a completion
+     * time has been entered, before allowing a job to be marked
+     * complete.
+     */
+    public static void completed(Map<id, Job__c> jobs) {
+        List<Job__c> jobTasks = [SELECT (SELECT completed__c FROM tasks__r) FROM job__c WHERE id IN :jobs.keySet()];
+        for (Job__c job : jobTasks) {
+            // Only jobs marked as completed need checked
+            if (jobs.get(job.id).completed__c) {
+                for (Task__c task : job.tasks__r) {
+                    if (!task.completed__c) {
+                        jobs.get(job.id).addError('Job cannot be completed with an incomplete task.');
+                    }
+                }
+                if (jobs.get(job.id).Date_Completed__c == null) {
+                    jobs.get(job.id).addError('Job completion date required to complete job.');
+                }
+                if (jobs.get(job.id).Actual_Time_to_Complete__c == null || jobs.get(job.id).Actual_Time_to_Complete__c <= 0) {
+                    jobs.get(job.id).addError('How long did the job take to complete?');
+                }
+            }
+        }
+    }
+}
