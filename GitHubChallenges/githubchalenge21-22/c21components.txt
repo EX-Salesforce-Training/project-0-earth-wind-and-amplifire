@@ -1,0 +1,9 @@
+<aura:component>
+    <lightning:card title="Test Header" iconName="standard:account" footer="Foots">
+        <p class="slds-p-horizontal_small">
+            Hello World
+        </p>
+    </lightning:card>
+    
+    <lightning:badge label="New Badge"/>
+</aura:component>

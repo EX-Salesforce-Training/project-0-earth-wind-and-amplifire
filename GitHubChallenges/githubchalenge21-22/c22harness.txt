@@ -1,0 +1,3 @@
+<aura:application >
+	<c:c22component></c:c22component>
+</aura:application>

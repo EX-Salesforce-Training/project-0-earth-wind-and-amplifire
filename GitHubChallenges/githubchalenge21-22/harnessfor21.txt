@@ -1,0 +1,3 @@
+<aura:application extends="force:slds" >
+	 <c:c21components></c:c21components>
+</aura:application>

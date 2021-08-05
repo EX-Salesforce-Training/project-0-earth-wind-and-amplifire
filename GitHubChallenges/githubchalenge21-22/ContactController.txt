@@ -1,0 +1,12 @@
+public class ContactController {
+    @AuraEnabled
+    public Static List<String> listofContacts(){
+        List<String> listNames = new List<String>();
+        List<Contact> listCon = [SELECT LastName FROM Contact];
+        for(contact c : listCon){
+            listNames.add(c.LastName);
+        }
+        return listNames;
+    }
+
+}

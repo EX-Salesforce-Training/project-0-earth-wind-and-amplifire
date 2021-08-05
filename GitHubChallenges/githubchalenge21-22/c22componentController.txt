@@ -1,0 +1,12 @@
+({
+    ContactCont : function(component, event, helper) {
+        console.log("function called");
+        let Contacts = component.get("c.listofContacts");
+        Contacts.setCallback(this, function(response){
+                             if(response.getState() === "SUCCESS"){
+            	component.set("v.contacts", response.getReturnValue());
+        }
+    })
+    $A.enqueueAction(Contacts);
+}
+ })
