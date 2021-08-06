@@ -1,0 +1,13 @@
+({
+	myAction : function(component, event, helper) {
+        console.log("event function");
+        let customEvent = component.getEvent("customEvent");
+        
+        customEvent.setParams({
+            "message" : "Component event fired"
+        });
+        
+        customEvent.fire();
+		
+	}
+})

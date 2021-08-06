@@ -1,0 +1,7 @@
+({
+	myAction : function(component, event, helper) {
+        console.log("message function");
+		 let message = event.getParam("message");
+        component.set("v.messageRetrieved", message);
+	}
+})

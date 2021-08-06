@@ -1,0 +1,3 @@
+<aura:application >
+    <c:c23EventHarness/>
+</aura:application>

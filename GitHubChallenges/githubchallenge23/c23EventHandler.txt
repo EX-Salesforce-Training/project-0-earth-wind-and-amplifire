@@ -1,0 +1,11 @@
+<aura:component >
+    <aura:attribute name="messageRetrieved" type="String"/>
+    
+    <aura:handler name="customEvent" event="c:CustomEvent" action="{!c.myAction}" />
+    
+    <div>
+        <p>Event Message: {!v.messageRetrieved}</p>
+    </div>
+    
+    <c:c23customEventNotifier />
+</aura:component>
